@@ -230,3 +230,18 @@ INSERT INTO course_fee VALUES ('&course_no','&full_part',&fees);
 INSERT INTO student VALUES (&prospectus_no,'&name','&address',&phone_no,TO_DATE('&d_o_b','DD-MM-YYYY'),&total_amnt,&amnt_paid,'&installment');
 INSERT INTO installment VALUES (&prospectus_no,&installment_amnt,TO_DATE('&due_dt','DD-MM-YYYY'),'&paid');
 INSERT INTO course_taken VALUES (&prospectus_no,'&course_no',TO_DATE('&start_dt','DD-MM-YYYY'),'&full_part','&time_slot','&performance');
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    str VARCHAR2(100) := '&str';
+    rev VARCHAR2(100) := '';
+BEGIN
+    FOR i IN REVERSE 1..LENGTH(str)
+    LOOP
+        rev := rev || SUBSTR(str,i,1);
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE(rev);
+END;
+/
