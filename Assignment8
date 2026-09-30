@@ -1,0 +1,232 @@
+
+-- Q1
+SELECT s.name, c.course_no
+FROM student s, course_taken c
+WHERE s.prospectus_no = c.prospectus_no;
+
+
+-- Q2
+SELECT name
+FROM student
+WHERE amnt_paid = total_amnt;
+
+
+-- Q3
+SELECT name
+FROM student
+WHERE name LIKE 'A%';
+
+
+-- Q4
+SELECT s.name
+FROM student s, installment i
+WHERE s.prospectus_no = i.prospectus_no
+AND s.total_amnt <> i.installment_amnt;
+
+
+-- Q5
+SELECT COUNT(*) AS student_count
+FROM student
+WHERE TRUNC(d_o_b,'MM') = TRUNC(SYSDATE,'MM');
+
+
+-- Q6
+SELECT MAX(fees) AS maximum_fee,
+       MIN(fees) AS minimum_fee
+FROM course_fee;
+
+
+-- Q7
+SELECT c.course_no, c.course_name,
+       f.full_part, f.fees
+FROM course c, course_fee f
+WHERE c.course_no = f.course_no
+AND f.fees BETWEEN 5000 AND 10000;
+
+
+-- Q8
+SELECT name,
+       TO_CHAR(d_o_b,'DD FMMonth YYYY') AS admission_date
+FROM student;
+
+
+-- Q9
+ALTER TABLE course
+MODIFY course_name VARCHAR2(25);
+
+UPDATE course
+SET course_name = 'Unix Operating System'
+WHERE course_name = 'Unix';
+
+COMMIT;
+
+
+-- Q10
+SELECT c.course_no, c.course_name, COUNT(*) AS student_count
+FROM student s, course_taken ct, course c
+WHERE s.prospectus_no = ct.prospectus_no
+AND ct.course_no = c.course_no
+AND TRUNC(s.d_o_b,'MM') = TRUNC(SYSDATE,'MM')
+GROUP BY c.course_no, c.course_name
+HAVING COUNT(*) =
+(
+    SELECT MAX(student_count)
+    FROM
+    (
+        SELECT ct.course_no,
+               COUNT(*) AS student_count
+        FROM student s, course_taken ct
+        WHERE s.prospectus_no = ct.prospectus_no
+        AND TRUNC(s.d_o_b,'MM') = TRUNC(SYSDATE,'MM')
+        GROUP BY ct.course_no
+    )
+);
+CREATE TABLE course
+(
+    course_no   CHAR(4) PRIMARY KEY,
+    course_name VARCHAR2(20)
+);
+CREATE TABLE course_fee
+(
+    course_no CHAR(4) PRIMARY KEY,
+    full_part CHAR(1),
+    fees      NUMBER(10)
+);
+CREATE TABLE student
+(
+    prospectus_no NUMBER(10) PRIMARY KEY,
+    name          VARCHAR2(20),
+    address       VARCHAR2(30),
+    phone_no      NUMBER(11),
+    d_o_b         DATE,
+    total_amnt    NUMBER(10,2),
+    amnt_paid     NUMBER(10,2),
+    installment   CHAR(1)
+);
+CREATE TABLE installment
+(
+    prospectus_no   NUMBER(10),
+    installment_amnt NUMBER(10,2),
+    due_dt          DATE,
+    paid            CHAR(1),
+    CONSTRAINT fk_installment_student
+    FOREIGN KEY (prospectus_no)
+    REFERENCES student(prospectus_no)
+);
+CREATE TABLE course_taken
+(
+    prospectus_no NUMBER(10),
+    course_no     VARCHAR2(4),
+    start_dt      DATE,
+    full_part     CHAR(1),
+    time_slot     CHAR(2),
+    performance   VARCHAR2(20),
+    CONSTRAINT fk_course_taken_student
+    FOREIGN KEY (prospectus_no)
+    REFERENCES student(prospectus_no)
+);
+COURSE data
+COURSE_NO
+COURSE_NAME
+C101
+Unix
+C102
+Java
+C103
+Oracle
+
+COURSE_FEE data
+COURSE_NO
+FULL_PART
+FEES
+C101
+F
+8000
+C102
+F
+12000
+C103
+F
+6000
+
+PROSPECTUS_NO
+NAME
+ADDRESS
+PHONE_NO
+D_O_B
+TOTAL_AMNT
+AMNT_PAID
+INSTALLMENT
+1001
+AARAV
+RANCHI
+9876543210
+05-SEP-2026
+8000
+8000
+N
+1002
+ANANYA
+KOLKATA
+9876543211
+10-SEP-2026
+12000
+7000
+Y
+1003
+ROHIT
+DELHI
+9876543212
+15-SEP-2026
+8000
+4000
+Y
+
+PROSPECTUS_NO
+INSTALLMENT_AMNT
+DUE_DT
+PAID
+1001
+8000
+30-SEP-2026
+Y
+1002
+5000
+30-SEP-2026
+N
+1003
+8000
+30-SEP-2026
+N
+
+COURSE_TAKEN data
+PROSPECTUS_NO
+COURSE_NO
+START_DT
+FULL_PART
+TIME_SLOT
+PERFORMANCE
+1001
+C101
+05-SEP-2026
+F
+AM
+Good
+1002
+C102
+10-SEP-2026
+F
+PM
+Excellent
+1003
+C101
+15-SEP-2026
+F
+AM
+Good
+
+INSERT INTO course VALUES ('&course_no','&course_name');
+INSERT INTO course_fee VALUES ('&course_no','&full_part',&fees);
+INSERT INTO student VALUES (&prospectus_no,'&name','&address',&phone_no,TO_DATE('&d_o_b','DD-MM-YYYY'),&total_amnt,&amnt_paid,'&installment');
+INSERT INTO installment VALUES (&prospectus_no,&installment_amnt,TO_DATE('&due_dt','DD-MM-YYYY'),'&paid');
+INSERT INTO course_taken VALUES (&prospectus_no,'&course_no',TO_DATE('&start_dt','DD-MM-YYYY'),'&full_part','&time_slot','&performance');
